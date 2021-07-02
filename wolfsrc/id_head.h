@@ -1,5 +1,6 @@
 // ID_HEAD.H
 
+#include <stdbool.h>
 
 #define	EXTENSION	"WLF"
 #define WOLF
@@ -11,9 +12,9 @@
 
 #define GRMODE	VGAGR
 
-#include "VERSION.H"
+#include "version.h"
 
-typedef	enum	{false,true}	boolean;
+#define boolean bool
 typedef	unsigned	char		byte;
 typedef	unsigned	int			word;
 typedef	unsigned	long		longword;

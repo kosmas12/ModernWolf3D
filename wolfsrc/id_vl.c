@@ -1,11 +1,13 @@
 // ID_VL.C
 
-#include <dos.h>
-#include <alloc.h>
-#include <mem.h>
+//#include <dos.h>
+#include <alloca.h>
+#include <memory.h>
 #include <string.h>
-#include "ID_HEAD.H"
-#include "ID_VL.H"
+#include "id_head.h"
+#include "id_vl.h"
+#include "id_us.h"
+
 #pragma hdrstop
 
 //
@@ -25,7 +27,7 @@ unsigned	bordercolor;
 
 boolean		fastpalette;				// if true, use outsb to set
 
-byte		far	palette1[256][3],far palette2[256][3];
+byte		palette1[256][3], palette2[256][3];
 
 //===========================================================================
 
@@ -68,15 +70,15 @@ void	VL_Startup (void)
 
 static	char *ParmStrings[] = {"HIDDENCARD",""};
 
-void	VL_Startup (void)
+void VL_Startup (void)
 {
 	int i,videocard;
 
-	asm	cld;
+	asm	("cld");
 
 	videocard = VL_VideoID ();
-	for (i = 1;i < _argc;i++)
-		if (US_CheckParm(_argv[i],ParmStrings) == 0)
+	for (i = 1;i < argc; i++)
+		if (US_CheckParm(argv[i],ParmStrings) == 0)
 		{
 			videocard = 5;
 			break;
@@ -114,9 +116,10 @@ void	VL_Shutdown (void)
 
 void	VL_SetVGAPlaneMode (void)
 {
-asm	mov	ax,0x13
-asm	int	0x10
-	VL_DePlaneVGA ();
+asm	("mov ax,0x13\n\t" \
+     "int	0x10");
+
+    VL_DePlaneVGA ();
 	VGAMAPMASK(15);
 	VL_SetLineWidth (40);
 }
@@ -132,8 +135,8 @@ asm	int	0x10
 
 void	VL_SetTextMode (void)
 {
-asm	mov	ax,3
-asm	int	0x10
+asm	("mov ax,3\n\t" \
+    "int 0x10");
 }
 
 //===========================================================================
@@ -150,13 +153,13 @@ asm	int	0x10
 
 void VL_ClearVideo (byte color)
 {
-asm	mov	dx,GC_INDEX
-asm	mov	al,GC_MODE
-asm	out	dx,al
-asm	inc	dx
-asm	in	al,dx
-asm	and	al,0xfc				// write mode 0 to store directly to video
-asm	out	dx,al
+asm	("mov dx,GC_INDEX\n\t" \
+    "mov al,GC_MODE\n\t" \
+    "out dx,al\n\t" \
+    "inc dx\n\t" \
+    "in	al,dx\n\t" \
+    "and al,0xfc\n\t" // write mode 0 to store directly to video
+    "out dx,al");
 
 asm	mov	dx,SC_INDEX
 asm	mov	ax,SC_MAPMASK+15*256
@@ -368,7 +371,7 @@ void VL_GetColor	(int color, int *red, int *green, int *blue)
 =================
 */
 
-void VL_SetPalette (byte far *palette)
+void VL_SetPalette (byte *palette)
 {
 	int	i;
 
@@ -425,7 +428,7 @@ done:
 =================
 */
 
-void VL_GetPalette (byte far *palette)
+void VL_GetPalette (byte *palette)
 {
 	int	i;
 
@@ -450,7 +453,7 @@ void VL_GetPalette (byte far *palette)
 void VL_FadeOut (int start, int end, int red, int green, int blue, int steps)
 {
 	int		i,j,orig,delta;
-	byte	far *origptr, far *newptr;
+	byte	far *origptr, *newptr;
 
 	VL_WaitVBL(1);
 	VL_GetPalette (&palette1[0][0]);
@@ -497,7 +500,7 @@ void VL_FadeOut (int start, int end, int red, int green, int blue, int steps)
 =================
 */
 
-void VL_FadeIn (int start, int end, byte far *palette, int steps)
+void VL_FadeIn (int start, int end, byte *palette, int steps)
 {
 	int		i,j,delta;
 
@@ -604,7 +607,7 @@ void VL_Plot (int x, int y, int color)
 
 	mask = pixmasks[x&3];
 	VGAMAPMASK(mask);
-	*(byte far *)MK_FP(SCREENSEG,bufferofs+(ylookup[y]+(x>>2))) = color;
+	*(byte *)MK_FP(SCREENSEG,bufferofs+(ylookup[y]+(x>>2))) = color;
 	VGAMAPMASK(15);
 }
 
@@ -749,7 +752,7 @@ void VL_Bar (int x, int y, int width, int height, int color)
 =================
 */
 
-void VL_MemToLatch (byte far *source, int width, int height, unsigned dest)
+void VL_MemToLatch (byte *source, int width, int height, unsigned dest)
 {
 	unsigned	count;
 	byte	plane,mask;
@@ -788,9 +791,9 @@ asm	mov	ds,ax
 =================
 */
 
-void VL_MemToScreen (byte far *source, int width, int height, int x, int y)
+void VL_MemToScreen (byte *source, int width, int height, int x, int y)
 {
-	byte    far *screen,far *dest,mask;
+	byte    *screen,far *dest,mask;
 	int		plane;
 
 	width>>=2;
@@ -823,9 +826,9 @@ void VL_MemToScreen (byte far *source, int width, int height, int x, int y)
 =================
 */
 
-void VL_MaskedToScreen (byte far *source, int width, int height, int x, int y)
+void VL_MaskedToScreen (byte *source, int width, int height, int x, int y)
 {
-	byte    far *screen,far *dest,mask;
+	byte    *screen,far *dest,mask;
 	byte	far *maskptr;
 	int		plane;
 
@@ -957,7 +960,7 @@ asm	mov	ds,ax
 ===================
 */
 
-void VL_DrawTile8String (char *str, char far *tile8ptr, int printx, int printy)
+void VL_DrawTile8String (char *str, char *tile8ptr, int printx, int printy)
 {
 	int		i;
 	unsigned	far *dest,far *screen,far *src;
@@ -966,7 +969,7 @@ void VL_DrawTile8String (char *str, char far *tile8ptr, int printx, int printy)
 
 	while (*str)
 	{
-		src = (unsigned far *)(tile8ptr + (*str<<6));
+		src = (unsigned *)(tile8ptr + (*str<<6));
 		// each character is 64 bytes
 
 		VGAMAPMASK(1);
@@ -1073,12 +1076,3 @@ void VL_SizeTile8String (char *str, int *width, int *height)
 	*height = 8;
 	*width = 8*strlen(str);
 }
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 // WL_MAIN.C
 
-#include <conio.h>
-#include "WL_DEF.H"
+#include <stdio.h>
+#include "wl_def.h"
 #pragma hdrstop
 
 

@@ -4,6 +4,9 @@
 //		particular I/O location
 //
 ///////////////////////////////////////////////////////////////////////////
+
+#include "id_heads.h"
+
 static boolean
 SDL_CheckSB(int port)
 {
@@ -83,5 +86,3 @@ SDL_DetectSoundBlaster(int port)
 	else
 		return(SDL_CheckSB(port));	// User specified address or default
 }
-
-

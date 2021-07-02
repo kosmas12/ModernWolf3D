@@ -1,4 +1,3 @@
-
 /*
 =================
 =
@@ -7,10 +6,17 @@
 =================
 */
 
-void VL_MungePic (unsigned char far *source, unsigned width, unsigned height)
+
+#include <malloc.h>
+#include <memory.h>
+#include <stdlib.h>
+
+#define errout(c) printf(c); exit(1);
+
+void VL_MungePic (unsigned char *source, unsigned width, unsigned height)
 {
 	unsigned	x,y,plane,size,pwidth;
-	unsigned char	far *temp, far *dest, far *srcline;
+	unsigned char *temp, *dest, *srcline;
 
 	size = width*height;
 
@@ -20,11 +26,11 @@ void VL_MungePic (unsigned char far *source, unsigned width, unsigned height)
 //
 // copy the pic to a temp buffer
 //
-	temp = (unsigned char far *)farmalloc (size);
+	temp = (unsigned char *)malloc (size);
 	if (!temp)
 		errout ("Non enough memory for munge buffer!\n");
 
-	_fmemcpy (temp,source,size);
+	memcpy (temp,source,size);
 
 //
 // munge it back into the original buffer
